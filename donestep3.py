@@ -1,4 +1,3 @@
-
 import pygame
 import pygame.font
 from hashlib import sha256
@@ -153,7 +152,7 @@ class SHA256Visualizer:
         msg_text = font.render(f"Input Message: {self.message}", True, BLACK)
         screen.blit(msg_text, (50, 50))
         
-        if self.current_step >= 1:
+        if self.current_step == 1 or self.current_step == 2 or self.current_step == 3:
             step_text = font.render("Step 1: Convert characters to binary", True, BLUE)
             screen.blit(step_text, (50, 90))
             
@@ -184,11 +183,12 @@ class SHA256Visualizer:
                         char_text = font.render(f"'{self.message[i]}' = {binary}", True, GREEN)
                         screen.blit(char_text, (70, result_y + 10 + i*25))
         
-        if self.current_step >= 2:
+        if self.current_step == 2 or self.current_step == 3:
             self.draw_step2(screen)
-        if self.current_step >= 3:
+        if self.current_step == 3:
             self.draw_step3(screen)
         if self.current_step >= 4:
+            self.draw_step3b(screen)
             self.draw_step4(screen)
         if self.current_step >= 5:
             self.draw_step5(screen)
@@ -230,20 +230,108 @@ class SHA256Visualizer:
             block_preview = block[:32] + "..." + block[-32:]  
             block_text = font.render(f"Block {i+1}: {block_preview} ({len(block)} bits)", True, BLACK)
             screen.blit(block_text, (50, block_y + i * 25))
+
+    def draw_step3b(self, screen):
+        y = 90
+        text = font.render("Step 3: Split into 512-bit blocks", True, BLUE)
+        screen.blit(text, (50, y))
+
+        block_y = y + 25
+        for i, block in enumerate(self.blocks):
+            if i >= 4:  
+                overflow_text = font.render(f"... ({len(self.blocks) - 4} more blocks)", True, GRAY)
+                screen.blit(overflow_text, (50, block_y + i * 25))
+                break
+            block_preview = block[:32] + "..." + block[-32:]  
+            block_text = font.render(f"Block {i+1}: {block_preview} ({len(block)} bits)", True, BLACK)
+            screen.blit(block_text, (50, block_y + i * 25))
         
     def draw_step4(self, screen):
-        y = 400
+        y = 135
         text = font.render("Step 4: Compression Function", True, BLUE)
         screen.blit(text, (50, y))
         
-        compress_y = y + 25
-        explanation = [
-            "SHA-256 processes each block in 64 rounds.",
-            "Each round updates 8 hash values using the block.",
-            "Intermediate values are combined with constants (K) and functions (Ch, Maj, etc.).",
-        ]
-        for i, line in enumerate(explanation):
-            screen.blit(font.render(line, True, BLACK), (50, compress_y + i * 20))
+        compress_y = y + 30
+        variables = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+        initial_values = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]
+        
+        # Hiển thị giá trị ban đầu
+        text = font.render("Initial Values:", True, BLUE)
+        screen.blit(text, (50, compress_y))
+        for i, (var, value) in enumerate(zip(variables, initial_values)):
+            text = font.render(f"{var}: {value:08x}", True, BLACK)
+            screen.blit(text, (50 + (i % 4) * 280, compress_y + 30 + (i // 4) * 30))
+        
+        # Sử dụng block đầu tiên từ self.blocks
+        block = self.blocks[0]
+        
+        # Chuyển đổi khối thành 16 từ 32-bit (W0 đến W15)
+        w_values = [int(block[i:i+32], 2) for i in range(0, 512, 32)]
+        
+        # Hiển thị W0 đến W15 ban đầu
+        w_y = compress_y + 100
+        text = font.render("Initial W0 to W15:", True, BLUE)
+        screen.blit(text, (50, w_y))
+        
+        for i, w in enumerate(w_values):
+            text = font.render(f"W{i}: {w:08x}", True, BLACK)
+            screen.blit(text, (50 + (i % 4) * 280, w_y + 30 + (i // 4) * 30))
+        
+        # Hàm phụ trợ cho việc tính toán W
+        def right_rotate(value, amount):
+            return ((value >> amount) | (value << (32 - amount))) & 0xFFFFFFFF
+
+        def sigma0(x):
+            return right_rotate(x, 7) ^ right_rotate(x, 18) ^ (x >> 3)
+
+        def sigma1(x):
+            return right_rotate(x, 17) ^ right_rotate(x, 19) ^ (x >> 10)
+        
+        # Hiển thị cách tính W16 và các W tiếp theo
+        calc_y = w_y + 150
+        text = font.render("Calculating subsequent W values:", True, BLUE)
+        screen.blit(text, (50, calc_y))
+        
+        for i in range(16, 64):
+            if i % 16 == 0 and i > 16:
+                calc_y += 150  # Tạo khoảng cách giữa các nhóm W
+            
+            w_i_minus_2 = w_values[(i - 2) % 16]
+            w_i_minus_7 = w_values[(i - 7) % 16]
+            w_i_minus_15 = w_values[(i - 15) % 16]
+            w_i_minus_16 = w_values[(i - 16) % 16]
+            
+            # Tính giá trị W mới
+            new_w = (sigma1(w_i_minus_2) + w_i_minus_7 + sigma0(w_i_minus_15) + w_i_minus_16) & 0xFFFFFFFF
+            w_values[i % 16] = new_w
+            
+            text = font.render(f"W{i} = σ1(W{i-2}) + W{i-7} + σ0(W{i-15}) + W{i-16} = {new_w:08x}", True, BLACK)
+            screen.blit(text, (50, calc_y + ((i % 16) * 30)))
+            
+            # Hiển thị 16 giá trị W hiện tại
+            for j, w in enumerate(w_values):
+                text = font.render(f"W{(i-15+j)%64}: {w:08x}", True, BLACK)
+                screen.blit(text, (600 + (j % 4) * 140, calc_y + ((i % 16) * 30) + (j // 4) * 30))
+        
+        # # Hiển thị K0 đến K63 ở bên phải màn hình
+        # k_y = compress_y
+        # text = font.render("K0 to K63:", True, BLUE)
+        # screen.blit(text, (950, k_y))
+        
+        # k_values = [
+        #     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        #     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        #     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        #     0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        #     0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        #     0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        #     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        #     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+        # ]
+        
+        # for i, k in enumerate(k_values):
+        #     text = font.render(f"K{i}: {k:08x}", True, BLACK)
+        #     screen.blit(text, (950, k_y + 30 + i * 20))
 
     def draw_step5(self, screen):
         y = 520
