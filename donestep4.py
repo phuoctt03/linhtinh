@@ -1,4 +1,3 @@
-
 import pygame
 import pygame.font
 from hashlib import sha256
@@ -102,6 +101,8 @@ class SHA256Visualizer:
         self.current_w = 0
         self.scroll_offset = 0
         self.k_scroll_offset = 0
+        self.last_w_update = 0
+        self.w_update_delay = 0.5
         
     def update_message(self, msg):
         self.message = msg
@@ -162,12 +163,10 @@ class SHA256Visualizer:
             screen.blit(step_text, (50, 90))
             
             if not self.conversion_complete:
-                
                 self.binary_converter.draw(screen)
             
             if len(self.binary_result) > 0:
                 if self.conversion_complete:
-                    
                     result_y = 160
                     complete_binary = ''.join(self.binary_result)
                     final_text = font.render("Final binary string:", True, BLACK)
@@ -179,7 +178,6 @@ class SHA256Visualizer:
                         binary_text = font.render(chunk, True, GREEN)
                         screen.blit(binary_text, (70, result_y - 10))
                 else:
-                    
                     result_y = 400
                     result_text = font.render("Converted results:", True, BLACK)
                     screen.blit(result_text, (50, result_y - 20 ))
@@ -191,17 +189,18 @@ class SHA256Visualizer:
         if self.current_step == 2 or self.current_step == 3:
             self.draw_step2(screen)
         if self.current_step == 3:
+            self.current_w = 0
             self.draw_step3(screen)
-        if self.current_step >= 4:
+        if self.current_step == 4:
             self.draw_step3b(screen)
             self.draw_step4(screen)
         if self.current_step >= 5:
             self.draw_step5(screen)
         if self.current_w < 63:
-            self.current_w += 1
-        if self.current_w > 15:
-            self.scroll_offset += 30
-            self.k_scroll_offset += 30
+            current_time = time.time()
+            if current_time - self.last_w_update > self.w_update_delay:  
+                self.last_w_update = current_time
+                self.current_w += 1
             
     def draw_step2(self, screen):
         y = 180  
@@ -258,17 +257,15 @@ class SHA256Visualizer:
         
     def draw_step4(self, screen):
         y = 135
-        text = font.render("Step 4: Message Schedule (W Array)", True, (0, 0, 255))
+        text = font.render("Step 4: Message Schedule (W Array)", True, BLUE)
         screen.blit(text, (50, y))
         
         w_y = y + 30
         block = self.blocks[0]
         
-        # Convert block to initial 16 32-bit words (W0 to W15)
         for i in range(16):
             self.w_values[i] = int(block[i*32:(i+1)*32], 2)
         
-        # Helper functions for W calculation
         def right_rotate(value, amount):
             return ((value >> amount) | (value << (32 - amount))) & 0xFFFFFFFF
 
@@ -278,22 +275,25 @@ class SHA256Visualizer:
         def sigma1(x):
             return right_rotate(x, 17) ^ right_rotate(x, 19) ^ (x >> 10)
         
-        # Calculate W16 to W63
-        for i in range(16, 64):
-            w_i_minus_2 = self.w_values[i - 2]
-            w_i_minus_7 = self.w_values[i - 7]
-            w_i_minus_15 = self.w_values[i - 15]
-            w_i_minus_16 = self.w_values[i - 16]
-            
-            # Calculate new W value
-            new_w = (sigma1(w_i_minus_2) + w_i_minus_7 + sigma0(w_i_minus_15) + w_i_minus_16) & 0xFFFFFFFF
-            self.w_values[i] = new_w
+        sigma0_text1 = font.render("σ₀(x) = (x ≫ 7) ⊕ (x ≫ 18) ⊕ (x ≫ 3)", True, BLACK)
+        sigma1_text1 = font.render("σ₁(x) = (x ≫ 17) ⊕ (x ≫ 19) ⊕ (x ≫ 10)", True, BLACK)
+        screen.blit(sigma0_text1, (400, 300))
+        screen.blit(sigma1_text1, (400, 325))
 
-        # Display W values
+        for i in range(16, 64):
+            if i <= self.current_w:
+                w_i_minus_2 = self.w_values[i - 2]
+                w_i_minus_7 = self.w_values[i - 7]
+                w_i_minus_15 = self.w_values[i - 15]
+                w_i_minus_16 = self.w_values[i - 16]
+                
+                new_w = (sigma1(w_i_minus_2) + w_i_minus_7 + sigma0(w_i_minus_15) + w_i_minus_16) & 0xFFFFFFFF
+                self.w_values[i] = new_w
+
         w_display_y = w_y
         for i in range(max(0, self.current_w - 15), self.current_w + 1):
             if 0 <= i < 64:
-                text = font.render(f"W{i}: {self.w_values[i]:08x}", True, (0, 0, 0))
+                text = font.render(f"W{i}: {self.w_values[i]:08x}", True, BLACK)
                 screen.blit(text, (50, w_display_y - self.scroll_offset))
                 w_display_y += 30
 
@@ -306,25 +306,25 @@ class SHA256Visualizer:
             w_i_minus_15 = self.w_values[i - 15]
             w_i_minus_16 = self.w_values[i - 16]
             
-            text = font.render(f"Calculating W{i}:", True, (0, 0, 255))
+            text = font.render(f"Calculating W{i}:", True, BLUE)
             screen.blit(text, (50, calc_y))
             
-            formula = f"W{i} = σ1(W{i-2}) + W{i-7} + σ0(W{i-15}) + W{i-16}"
-            text = font.render(formula, True, (0, 0, 0))
+            formula = f"W{i} = σ₁(W{i-2}) + W{i-7} + σ₀(W{i-15}) + W{i-16}"
+            text = font.render(formula, True, BLACK)
             screen.blit(text, (50, calc_y + 30))
             
-            values = f"    = σ1({w_i_minus_2:08x}) + {w_i_minus_7:08x} + σ0({w_i_minus_15:08x}) + {w_i_minus_16:08x}"
-            text = font.render(values, True, (0, 0, 0))
+            values = f"    = σ₁({w_i_minus_2:08x}) + {w_i_minus_7:08x} + σ₀({w_i_minus_15:08x}) + {w_i_minus_16:08x}"
+            text = font.render(values, True, BLACK)
             screen.blit(text, (50, calc_y + 60))
             
             result = f"    = {self.w_values[i]:08x}"
-            text = font.render(result, True, (0, 0, 0))
+            text = font.render(result, True, BLACK)
             screen.blit(text, (50, calc_y + 90))
 
         # Display K constants on the right
-        k_y = w_y
-        text = font.render("K Constants:", True, (0, 0, 255))
-        screen.blit(text, (950, k_y))
+        k_y = y
+        text = font.render("K Constants:", True, BLUE)
+        screen.blit(text, (950, y))
         
         k_values = [
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -340,23 +340,15 @@ class SHA256Visualizer:
         k_display_y = k_y + 30
         for i in range(max(0, self.current_w - 15), self.current_w + 1):
             if 0 <= i < 64:
-                text = font.render(f"K{i}: {k_values[i]:08x}", True, (0, 0, 0))
+                text = font.render(f"K{i}: {k_values[i]:08x}", True, BLACK)
                 screen.blit(text, (950, k_display_y - self.k_scroll_offset))
                 k_display_y += 30
 
     def draw_step5(self, screen):
-        y = 520
+        y = 90
         text = font.render("Step 5: Final Hash", True, BLUE)
+        
         screen.blit(text, (50, y))
-        
-        explanation = [
-            "The final hash is produced by combining the 8 intermediate hash values:",
-            "H0, H1, H2, H3, H4, H5, H6, and H7.",
-            "These values are concatenated to form a single 256-bit hash.",
-        ]
-        for i, line in enumerate(explanation):
-            screen.blit(font.render(line, True, BLACK), (50, y + 30 + i * 20))
-        
         hash_text = font.render(f"Hash: {self.final_hash}", True, GREEN)
         screen.blit(hash_text, (50, y + 100))
 
