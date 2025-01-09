@@ -105,6 +105,11 @@ class SHA256Visualizer:
         self.last_w_update = 0
         self.w_update_delay = 0.3
         self.final_step5 = False
+        self.input_box = pygame.Rect(100, 350, 600, 50)  # Input box lớn hơn
+        self.button_box = pygame.Rect(750, 350, 150, 50)  # Nút "Visualize" lớn hơn
+        self.color = pygame.Color('dodgerblue2')
+        self.button_color = pygame.Color('lightgreen')
+        self.text = self.message
         
     def update_message(self, msg):
         self.message = msg
@@ -156,10 +161,23 @@ class SHA256Visualizer:
         
         title = title_font.render("SHA-256 Algorithm Visualization", True, BLACK)
         screen.blit(title, (WIDTH//2 - title.get_width()//2, 20))
-        
-        msg_text = font.render(f"Input Message: {self.message}", True, BLACK)
-        screen.blit(msg_text, (50, 50))
-        
+
+        if self.current_step == 0:
+            self.text = self.message
+            txt_surface = font.render(self.text, True, pygame.Color('black'))
+            width = max(600, txt_surface.get_width() + 10)
+            self.input_box.w = width
+            screen.blit(txt_surface, (self.input_box.x + 10, self.input_box.y + 10))
+            pygame.draw.rect(screen, self.color, self.input_box, 3)
+
+            pygame.draw.rect(screen, self.button_color, self.button_box)
+            button_text = font.render("Visualize", True, pygame.Color('black'))
+            screen.blit(button_text, (self.button_box.x + 15, self.button_box.y + 10))
+
+        if self.current_step > 0:
+            msg_text = font.render(f"Input Message: {self.message}", True, BLACK)
+            screen.blit(msg_text, (50, 50))
+
         if self.current_step == 1 or self.current_step == 2 or self.current_step == 3:
             step_text = font.render("Step 1: Convert characters to binary", True, BLUE)
             screen.blit(step_text, (50, 90))
@@ -173,12 +191,7 @@ class SHA256Visualizer:
                     complete_binary = ''.join(self.binary_result)
                     final_text = font.render("Final binary string:", True, BLACK)
                     screen.blit(final_text, (50, result_y - 40))
-                    
-                    chunk_size = 32
-                    for i in range(0, len(complete_binary), chunk_size):
-                        chunk = complete_binary[i:i+chunk_size]
-                        binary_text = font.render(chunk, True, GREEN)
-                        screen.blit(binary_text, (70, result_y - 10))
+                    screen.blit(font.render(complete_binary, True, GREEN), (70, result_y - 10))
                 else:
                     result_y = 400
                     result_text = font.render("Converted results:", True, BLACK)
@@ -441,39 +454,56 @@ class SHA256Visualizer:
                 maj_result = maj(a, b, c)
                 sigma0_result = sigma0(a)
                 sigma1_result = sigma1(e)
+                ch_math = font.render(f"Ch(e, f, g) = (e ∧ f) ⊕ (¬e ∧ g)", True, BLACK)
+                screen.blit(ch_math, (50, y + 70))
+                
+                maj_math = font.render(f"Maj(a, b, c) = (a ∧ b) ⊕ (a ∧ c) ⊕ (b ∧ c)", True, BLACK)
+                screen.blit(maj_math, (50, y + 100))
 
-                ch_text = font.render(f"Ch(e, f, g) = ({e:08x} ∧ {f:08x}) ⊕ (~{e:08x} ∧ {g:08x}) = {ch_result:08x}", True, BLACK)
-                screen.blit(ch_text, (50, y + 70))
+                sigma0_math = font.render(f"Σ₀(a) = (a ≫ 2) ⊕ (a ≫ 13) ⊕ (a ≫ 22)", True, BLACK)
+                screen.blit(sigma0_math, (50, y + 130))
+
+                sigma1_math = font.render(f"Σ₁(e) = (e ≫ 6) ⊕ (e ≫ 11) ⊕ (e ≫ 25)", True, BLACK)
+                screen.blit(sigma1_math, (50, y + 160))
+
+                t1_math = font.render(f"T₁ = h + Σ₁(e) + Ch(e, f, g) + K{i} + W{i}", True, BLACK)
+                screen.blit(t1_math, (50, y + 190))
+
+                t2_math = font.render(f"T₂ = Σ₀(a) + Maj(a, b, c)", True, BLACK)
+                screen.blit(t2_math, (50, y + 220))
+
+                ch_text = font.render(f"Ch(e, f, g) = ({e:08x} ∧ {f:08x}) ⊕ (¬{e:08x} ∧ {g:08x}) = {ch_result:08x}", True, BLACK)
+                screen.blit(ch_text, (50, y + 180 + 70))
 
                 maj_text = font.render(f"Maj(a, b, c) = ({a:08x} ∧ {b:08x}) ⊕ ({a:08x} ∧ {c:08x}) ⊕ ({b:08x} ∧ {c:08x}) = {maj_result:08x}", True, BLACK)
-                screen.blit(maj_text, (50, y + 100))
+                screen.blit(maj_text, (50, y + 180 + 100))
 
                 sigma0_text = font.render(f"Σ₀(a) = ({a:08x} ≫ 2) ⊕ ({a:08x} ≫ 13) ⊕ ({a:08x} ≫ 22) = {sigma0_result:08x}", True, BLACK)
-                screen.blit(sigma0_text, (50, y + 130))
+                screen.blit(sigma0_text, (50, y + 180 + 130))
 
                 sigma1_text = font.render(f"Σ₁(e) = ({e:08x} ≫ 6) ⊕ ({e:08x} ≫ 11) ⊕ ({e:08x} ≫ 25) = {sigma1_result:08x}", True, BLACK)
-                screen.blit(sigma1_text, (50, y + 160))
+                screen.blit(sigma1_text, (50, y + 180 + 160))
 
                 t1_text = font.render(f"T₁ = {h:08x} + {sigma1_result:08x} + {ch_result:08x} + {k:08x} + {w:08x} = {T1:08x}", True, BLACK)
-                screen.blit(t1_text, (50, y + 190))
+                screen.blit(t1_text, (50, y + 180 + 190))
 
                 t2_text = font.render(f"T₂ = {sigma0_result:08x} + {maj_result:08x} = {T2:08x}", True, BLACK)
-                screen.blit(t2_text, (50, y + 220))
+                screen.blit(t2_text, (50, y + 180 + 220))
 
                 update_text = font.render(
                     f"Updates: h=g, g=f, f=e, e=d+T₁, d=c, c=b, b=a, a=T₁+T₂",
                     True, BLUE
                 )
-                screen.blit(update_text, (50, y + 250))
+                screen.blit(update_text, (50, y + 180 + 250))
                 
                 updated_text = font.render("Updated Values:", True, BLACK)
-                screen.blit(updated_text, (50, y + 280))
+                screen.blit(updated_text, (50, y + 180 + 280))
                 
                 updated_values = font.render(
                     f"a: {a:08x}, b: {b:08x}, c: {c:08x}, d: {d:08x}, e: {e:08x}, f: {f:08x}, g: {g:08x}, h: {h:08x}",
                     True, GREEN
                 )
-                screen.blit(updated_values, (50, y + 310))
+                screen.blit(updated_values, (50, y + 180 + 310))
 
         # After all rounds, add the compressed chunk to the current hash value
         final_hash_values = [
@@ -489,26 +519,25 @@ class SHA256Visualizer:
 
         if self.final_step5:
             final_text = font.render("Final Hash Values:", True, BLUE)
-            screen.blit(final_text, (50, y + 340))
+            screen.blit(final_text, (50, y + 180 + 340))
 
             x = 50
             for i, value in enumerate(final_hash_values):
                 final_value_text = font.render(f"{labels[i]}: {value:08x}", True, BLACK)
-                screen.blit(final_value_text, (x, y + 370))
+                screen.blit(final_value_text, (x, y + 180 + 370))
                 x += 135
 
             final_hash = ''.join(f"{value:08x}" for value in final_hash_values)
             hash_text = font.render(f"Final Hash: {final_hash}", True, BLUE)
-            screen.blit(hash_text, (50, y + 400))
+            screen.blit(hash_text, (50, y + 180 + 400))
 
-            # Verify with Python's hashlib
             hash_result = sha256(self.message.encode()).hexdigest()
             hash_result_text = font.render(f"SHA-256 Result: {hash_result}", True, BLUE)
-            screen.blit(hash_result_text, (50, y + 430))
+            screen.blit(hash_result_text, (50, y + 180 + 430))
 
 def main():
     visualizer = SHA256Visualizer()
-    visualizer.update_message("1")
+    # visualizer.update_message("hello")
     clock = pygame.time.Clock()
     running = True
     
@@ -516,23 +545,28 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                
-                if 50 <= mouse_pos[0] <= 150 and HEIGHT - 50 <= mouse_pos[1] <= HEIGHT - 20:
-                    visualizer.prev_step()
-                
-                elif 170 <= mouse_pos[0] <= 270 and HEIGHT - 50 <= mouse_pos[1] <= HEIGHT - 20:
-                    visualizer.next_step()
+            elif visualizer.current_step == 0:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        visualizer.message = visualizer.text[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        visualizer.update_message(visualizer.text)
+                        visualizer.next_step()
+                    else:
+                        visualizer.message += event.unicode
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if visualizer.button_box.collidepoint(event.pos):
+                        visualizer.update_message(visualizer.text)
+                        visualizer.next_step()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     visualizer.prev_step()
                 elif event.key == pygame.K_RIGHT:
                     visualizer.next_step()
-                elif event.key == pygame.K_RETURN:
-                    new_message = input("Enter new message: ")
-                    visualizer.update_message(new_message)
-        
+                elif event.key == pygame.K_ESCAPE:
+                    visualizer.update_message("")
+                    visualizer.current_step = 0
+            
         visualizer.update()
         visualizer.draw(screen)
         pygame.display.flip()
