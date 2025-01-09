@@ -197,6 +197,7 @@ class SHA256Visualizer:
             self.draw_step3b(screen)
             self.draw_step4(screen)
             self.calculation_h = 0
+            self.final_step5 = False
             if self.current_w < 63:
                 current_time = time.time()
                 if current_time - self.last_w_update > self.w_update_delay:  
@@ -494,7 +495,7 @@ class SHA256Visualizer:
             for i, value in enumerate(final_hash_values):
                 final_value_text = font.render(f"{labels[i]}: {value:08x}", True, BLACK)
                 screen.blit(final_value_text, (x, y + 370))
-                x += 130
+                x += 135
 
             final_hash = ''.join(f"{value:08x}" for value in final_hash_values)
             hash_text = font.render(f"Final Hash: {final_hash}", True, BLUE)
