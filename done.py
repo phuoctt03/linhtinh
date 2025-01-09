@@ -104,6 +104,7 @@ class SHA256Visualizer:
         self.k_scroll_offset = 0
         self.last_w_update = 0
         self.w_update_delay = 0.3
+        self.final_step5 = False
         
     def update_message(self, msg):
         self.message = msg
@@ -208,6 +209,8 @@ class SHA256Visualizer:
                 if current_time - self.last_w_update > self.w_update_delay:  
                     self.last_w_update = current_time
                     self.calculation_h += 1
+            else:
+                self.final_step5 = True
             
     def draw_step2(self, screen):
         y = 180  
@@ -365,24 +368,27 @@ class SHA256Visualizer:
         y = 90
         text = font.render("Step 5: Final Hash Computation", True, BLUE)
         screen.blit(text, (50, y))
+        
+        # Initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes)
         h_values = [
             0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
         ]
         labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         
-        # Display initial hash values (a b c d e f g h)
+        # Display initial hash values
         initial_text = font.render("Initial Hash Values (a b c d e f g h):", True, BLACK)
         screen.blit(initial_text, (50, y + 40))
         
-        # Define starting position for hash values
-        x_start = 50  # Initial x position
-        y_start = y + 70  # Initial y position
+        x_start = 50
+        y_start = y + 70
         x = x_start
         y = y_start
-        max_width = 1200  # Width of the screen (adjust according to your screen size)
-        spacing_x = 130  # Horizontal spacing between values
-        spacing_y = 40   # Vertical spacing between rows
+        max_width = 1200
+        spacing_x = 130
+        spacing_y = 40
+        
+        # Display initial values
         for i, value in enumerate(h_values):
             if x + spacing_x > max_width:
                 x = x_start
@@ -406,39 +412,51 @@ class SHA256Visualizer:
         def sigma1(x):
             return right_rotate(x, 6) ^ right_rotate(x, 11) ^ right_rotate(x, 25)
 
-        # Compression loop (64 rounds)
-        a, b, c, d, e, f, g, h = h_values
+        # Main compression function
+        working_vars = list(h_values)  # Create a copy of initial hash values
+        a, b, c, d, e, f, g, h = working_vars
+        
         for i in range(64):
             w = self.w_values[i]
             k = k_values[i]
-            # Calculate T1 and T2
+            
             T1 = (h + sigma1(e) + ch(e, f, g) + k + w) & 0xFFFFFFFF
             T2 = (sigma0(a) + maj(a, b, c)) & 0xFFFFFFFF
+            
+            h = g
+            g = f
+            f = e
+            e = (d + T1) & 0xFFFFFFFF
+            d = c
+            c = b
+            b = a
+            a = (T1 + T2) & 0xFFFFFFFF
 
-            # Update working variables
-            h, g, f, e, d, c, b, a = g, f, e, (d + T1) & 0xFFFFFFFF, c, b, a, (T1 + T2) & 0xFFFFFFFF
-
-            # Display the calculations for the current round
-            if i == self.calculation_h:  # Show the current step
+            if i == self.calculation_h:
                 step_text = font.render(f"Round {i + 1} Calculations", True, BLUE)
                 screen.blit(step_text, (50, y + 40))
 
-                ch_text = font.render(f"Ch(e, f, g) = ({e:08x} ∧ {f:08x}) ⊕ (~{e:08x} ∧ {g:08x}) = {ch(e, f, g):08x}", True, BLACK)
+                ch_result = ch(e, f, g)
+                maj_result = maj(a, b, c)
+                sigma0_result = sigma0(a)
+                sigma1_result = sigma1(e)
+
+                ch_text = font.render(f"Ch(e, f, g) = ({e:08x} ∧ {f:08x}) ⊕ (~{e:08x} ∧ {g:08x}) = {ch_result:08x}", True, BLACK)
                 screen.blit(ch_text, (50, y + 70))
 
-                maj_text = font.render(f"Maj(a, b, c) = ({a:08x} ∧ {b:08x}) ⊕ ({a:08x} ∧ {c:08x}) ⊕ ({b:08x} ∧ {c:08x}) = {maj(a, b, c):08x}", True, BLACK)
+                maj_text = font.render(f"Maj(a, b, c) = ({a:08x} ∧ {b:08x}) ⊕ ({a:08x} ∧ {c:08x}) ⊕ ({b:08x} ∧ {c:08x}) = {maj_result:08x}", True, BLACK)
                 screen.blit(maj_text, (50, y + 100))
 
-                sigma0_text = font.render(f"Σ₀(a) = ROTR(a, 2) ⊕ ROTR(a, 13) ⊕ ROTR(a, 22) = {sigma0(a):08x}", True, BLACK)
+                sigma0_text = font.render(f"Σ₀(a) = ({a:08x} ≫ 2) ⊕ ({a:08x} ≫ 13) ⊕ ({a:08x} ≫ 22) = {sigma0_result:08x}", True, BLACK)
                 screen.blit(sigma0_text, (50, y + 130))
 
-                sigma1_text = font.render(f"Σ₁(e) = ROTR(e, 6) ⊕ ROTR(e, 11) ⊕ ROTR(e, 25) = {sigma1(e):08x}", True, BLACK)
+                sigma1_text = font.render(f"Σ₁(e) = ({e:08x} ≫ 6) ⊕ ({e:08x} ≫ 11) ⊕ ({e:08x} ≫ 25) = {sigma1_result:08x}", True, BLACK)
                 screen.blit(sigma1_text, (50, y + 160))
 
-                t1_text = font.render(f"T₁ = h + Σ₁(e) + Ch(e, f, g) + K[i] + W[i] = {T1:08x}", True, BLACK)
+                t1_text = font.render(f"T₁ = {h:08x} + {sigma1_result:08x} + {ch_result:08x} + {k:08x} + {w:08x} = {T1:08x}", True, BLACK)
                 screen.blit(t1_text, (50, y + 190))
 
-                t2_text = font.render(f"T₂ = Σ₀(a) + Maj(a, b, c) = {T2:08x}", True, BLACK)
+                t2_text = font.render(f"T₂ = {sigma0_result:08x} + {maj_result:08x} = {T2:08x}", True, BLACK)
                 screen.blit(t2_text, (50, y + 220))
 
                 update_text = font.render(
@@ -446,35 +464,46 @@ class SHA256Visualizer:
                     True, BLUE
                 )
                 screen.blit(update_text, (50, y + 250))
-                updated_text = font.render(
-                    f"Updated Values:",
-                    True, BLACK
-                )
+                
+                updated_text = font.render("Updated Values:", True, BLACK)
                 screen.blit(updated_text, (50, y + 280))
+                
                 updated_values = font.render(
                     f"a: {a:08x}, b: {b:08x}, c: {c:08x}, d: {d:08x}, e: {e:08x}, f: {f:08x}, g: {g:08x}, h: {h:08x}",
                     True, GREEN
                 )
                 screen.blit(updated_values, (50, y + 310))
-            if i == 63:
-                final_hash_values = [a + h_values[0], b + h_values[1], c + h_values[2], d + h_values[3], 
-                         e + h_values[4], f + h_values[5], g + h_values[6], h + h_values[7]]
-    
-                final_text = font.render("Final Hash Values (a+b, b+b, c+c, d+d, e+e, f+f, g+g, h+h):", True, (0, 0, 255))
-                screen.blit(final_text, (50, y + 340))
 
-                x = 50
-                for i, value in enumerate(final_hash_values):
-                    final_value_text = font.render(f"{labels[i]}: {value:08x}", True, (0, 0, 0))
-                    screen.blit(final_value_text, (x, y + 370))
-                    x += 138
-                final_hash = ''.join(f"{value:08x}" for value in final_hash_values)
-                hash_text = font.render(f"Final Hash: {final_hash}", True, (0, 0, 255))
-                screen.blit(hash_text, (50, y + 400))
-                # use sha256 to verify the result
-                hash_result = sha256(self.message.encode()).hexdigest()
-                hash_result_text = font.render(f"SHA-256 Result: {hash_result}", True, (0, 0, 255))
-                screen.blit(hash_result_text, (50, y + 430))
+        # After all rounds, add the compressed chunk to the current hash value
+        final_hash_values = [
+            (a + h_values[0]) & 0xFFFFFFFF,
+            (b + h_values[1]) & 0xFFFFFFFF,
+            (c + h_values[2]) & 0xFFFFFFFF,
+            (d + h_values[3]) & 0xFFFFFFFF,
+            (e + h_values[4]) & 0xFFFFFFFF,
+            (f + h_values[5]) & 0xFFFFFFFF,
+            (g + h_values[6]) & 0xFFFFFFFF,
+            (h + h_values[7]) & 0xFFFFFFFF
+        ]
+
+        if self.final_step5:
+            final_text = font.render("Final Hash Values:", True, BLUE)
+            screen.blit(final_text, (50, y + 340))
+
+            x = 50
+            for i, value in enumerate(final_hash_values):
+                final_value_text = font.render(f"{labels[i]}: {value:08x}", True, BLACK)
+                screen.blit(final_value_text, (x, y + 370))
+                x += 130
+
+            final_hash = ''.join(f"{value:08x}" for value in final_hash_values)
+            hash_text = font.render(f"Final Hash: {final_hash}", True, BLUE)
+            screen.blit(hash_text, (50, y + 400))
+
+            # Verify with Python's hashlib
+            hash_result = sha256(self.message.encode()).hexdigest()
+            hash_result_text = font.render(f"SHA-256 Result: {hash_result}", True, BLUE)
+            screen.blit(hash_result_text, (50, y + 430))
 
 def main():
     visualizer = SHA256Visualizer()
