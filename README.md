@@ -53,9 +53,9 @@ Nếu lệnh này trả về phiên bản của Pygame (ví dụ: `2.1.3`), bạ
 
 Chúc bạn thành công và tận hưởng chương trình với Pygame! 🚀
 
-# Đây là ứng dụng mô phỏng thuật toán SHA-256 với giao diện sử dụng Pygame:
+# Sau đây là cách sử dụng ứng dụng mô phỏng thuật toán SHA-256 với giao diện sử dụng Pygame:
 
-- Khi bắt đầu ứng dụng hãy nhập văn bản bạn muốn mô phỏng
+- Khi bắt đầu ứng dụng hãy nhập văn bản bạn muốn mô phỏng (**Lưu ý**: Chỉ nhập ký tự chữ và số)
 - Nhấn nút **Enter** hoặc nhấp chuột vào nút **Visualize** để bắt đầu
 - Để xóa 1 ký tự khi nhập hãy nhấn nút **Backscape**
 
