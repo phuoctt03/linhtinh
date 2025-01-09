@@ -59,7 +59,7 @@ Chúc bạn thành công và tận hưởng chương trình với Pygame! 🚀
 - Nhấn nút **Enter** hoặc nhấp chuột vào nút **Visualize** để bắt đầu
 - Để xóa 1 ký tự khi nhập hãy nhấn nút **Backscape**
 
-# Sau bước này thì chuyển sang điều khiển bằng các nút dưới:
+## Sau khi bắt đầu mô phỏng thì chuyển sang điều khiển bằng các nút dưới:
 - **Return** để quay trở lại bắt đầu để nhập văn bản mới
 - ➡ **Sang phải** để tiến tới bước tiếp theo và lưu ý chỉ dùng khi bước hiện tại đã mô phỏng xong
 - ⬅ **Sang trái** để lùi lại bước trước
