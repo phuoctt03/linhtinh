@@ -1,4 +1,9 @@
-# Hướng dẫn cài đặt và chạy file `done.py` với Pygame
+# SHA-256 Algorithm Simulation with Pygame
+
+Đây là ứng dụng mô phỏng thuật toán SHA-256 với giao diện sử dụng Pygame, cho phép người dùng điều khiển các bước giải thích thuật toán bằng cách ấn nút:
+
+➡ **Sang phải** để tiến tới bước tiếp theo  
+⬅ **Sang trái** để lùi lại bước trước
 
 ## Yêu cầu hệ thống
 1. Python 3.6 trở lên.
