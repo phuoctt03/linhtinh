@@ -1,10 +1,5 @@
 # SHA-256 Algorithm Simulation with Pygame
 
-Đây là ứng dụng mô phỏng thuật toán SHA-256 với giao diện sử dụng Pygame, cho phép người dùng điều khiển các bước giải thích thuật toán bằng cách ấn nút:
-
-➡ **Sang phải** để tiến tới bước tiếp theo  
-⬅ **Sang trái** để lùi lại bước trước
-
 ## Yêu cầu hệ thống
 1. Python 3.6 trở lên.
 2. Môi trường lập trình đã cài đặt `pip`.
@@ -58,5 +53,15 @@ Nếu lệnh này trả về phiên bản của Pygame (ví dụ: `2.1.3`), bạ
 
 Chúc bạn thành công và tận hưởng chương trình với Pygame! 🚀
 
+# Đây là ứng dụng mô phỏng thuật toán SHA-256 với giao diện sử dụng Pygame:
+
+Khi bắt đầu ứng dụng hãy nhập văn bản bạn muốn mô phỏng
+Nhấn nút **Enter** hoặc nhấp chuột vào nút **Visualize** để bắt đầu
+Để xóa 1 ký tự khi nhập hãy nhấn nút **Backscape**
+
+# Sau bước này thì chuyển sang điều khiển bằng các nút dưới:
+**Return** để quay trở lại bắt đầu để nhập văn bản mới
+➡ **Sang phải** để tiến tới bước tiếp theo và lưu ý chỉ dùng khi bước hiện tại đã mô phỏng xong
+⬅ **Sang trái** để lùi lại bước trước
 
 https://yesno.wtf/api
