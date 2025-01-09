@@ -454,22 +454,22 @@ class SHA256Visualizer:
                 maj_result = maj(a, b, c)
                 sigma0_result = sigma0(a)
                 sigma1_result = sigma1(e)
-                ch_math = font.render(f"Ch(e, f, g) = (e ∧ f) ⊕ (¬e ∧ g)", True, BLACK)
+                ch_math = font.render(f"Ch(e, f, g) = (e ∧ f) ⊕ (¬e ∧ g)", True, BLUE)
                 screen.blit(ch_math, (50, y + 70))
                 
-                maj_math = font.render(f"Maj(a, b, c) = (a ∧ b) ⊕ (a ∧ c) ⊕ (b ∧ c)", True, BLACK)
+                maj_math = font.render(f"Maj(a, b, c) = (a ∧ b) ⊕ (a ∧ c) ⊕ (b ∧ c)", True, BLUE)
                 screen.blit(maj_math, (50, y + 100))
 
-                sigma0_math = font.render(f"Σ₀(a) = (a ≫ 2) ⊕ (a ≫ 13) ⊕ (a ≫ 22)", True, BLACK)
+                sigma0_math = font.render(f"Σ₀(a) = (a ≫ 2) ⊕ (a ≫ 13) ⊕ (a ≫ 22)", True, BLUE)
                 screen.blit(sigma0_math, (50, y + 130))
 
-                sigma1_math = font.render(f"Σ₁(e) = (e ≫ 6) ⊕ (e ≫ 11) ⊕ (e ≫ 25)", True, BLACK)
+                sigma1_math = font.render(f"Σ₁(e) = (e ≫ 6) ⊕ (e ≫ 11) ⊕ (e ≫ 25)", True, BLUE)
                 screen.blit(sigma1_math, (50, y + 160))
 
-                t1_math = font.render(f"T₁ = h + Σ₁(e) + Ch(e, f, g) + K{i} + W{i}", True, BLACK)
+                t1_math = font.render(f"T₁ = h + Σ₁(e) + Ch(e, f, g) + K{i} + W{i}", True, BLUE)
                 screen.blit(t1_math, (50, y + 190))
 
-                t2_math = font.render(f"T₂ = Σ₀(a) + Maj(a, b, c)", True, BLACK)
+                t2_math = font.render(f"T₂ = Σ₀(a) + Maj(a, b, c)", True, BLUE)
                 screen.blit(t2_math, (50, y + 220))
 
                 ch_text = font.render(f"Ch(e, f, g) = ({e:08x} ∧ {f:08x}) ⊕ (¬{e:08x} ∧ {g:08x}) = {ch_result:08x}", True, BLACK)
