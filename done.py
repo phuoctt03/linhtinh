@@ -195,7 +195,7 @@ class SHA256Visualizer:
                     max_display_length = 70
                     display_length = max_display_length / 2
                     if len(complete_binary) > max_display_length:
-                        display_binary = complete_binary[:display_length] + "..." complete_binary[-display_length:]
+                        display_binary = complete_binary[:display_length] + "..." + complete_binary[-display_length:]
                     else:
                         display_binary = complete_binary
                     
@@ -256,7 +256,7 @@ class SHA256Visualizer:
         max_display_length = 70
         display_length = max_display_length / 2
         if len(msg_binary) > max_display_length:
-            display_binary = msg_binary[:display_length] + "..." msg_binary[-display_length:]
+            display_binary = msg_binary[:display_length] + "..." + msg_binary[-display_length:]
         else:
             display_binary = msg_binary
         padding_one = font.render("Add '1' bit:", True, BLACK)
