@@ -21,9 +21,9 @@ YELLOW = (255, 255, 0)
 LIGHT_BLUE = (173, 216, 230)
 
 FONT_SIZE = 20
-font = pygame.font.SysFont('Arial', FONT_SIZE)
-title_font = pygame.font.SysFont('Arial', 30, bold=True)
-small_font = pygame.font.SysFont('Arial', 16)
+font = pygame.font.SysFont('Arial Unicode MS', FONT_SIZE)
+title_font = pygame.font.SysFont('Arial Unicode MS', 30, bold=True)
+small_font = pygame.font.SysFont('Arial Unicode MS', 16)
 
 class BinaryConverter:
     def __init__(self, x, y):
@@ -189,9 +189,17 @@ class SHA256Visualizer:
                 if self.conversion_complete:
                     result_y = 160
                     complete_binary = ''.join(self.binary_result)
+                    # Giới hạn hiển thị chuỗi binary
+                    max_display_length = 70
+                    if len(complete_binary) > max_display_length:
+                        display_binary = complete_binary[:max_display_length] + "..."
+                    else:
+                        display_binary = complete_binary
+                    
+                    # Render chuỗi
                     final_text = font.render("Final binary string:", True, BLACK)
                     screen.blit(final_text, (50, result_y - 40))
-                    screen.blit(font.render(complete_binary, True, GREEN), (70, result_y - 10))
+                    screen.blit(font.render(display_binary, True, GREEN), (70, result_y - 10))
                 else:
                     result_y = 400
                     result_text = font.render("Converted results:", True, BLACK)
@@ -199,7 +207,16 @@ class SHA256Visualizer:
                     
                     for i, binary in enumerate(self.binary_result):
                         char_text = font.render(f"'{self.message[i]}' = {binary}", True, GREEN)
-                        screen.blit(char_text, (70, result_y + 10 + i*25))
+                        if (i<15):
+                            screen.blit(char_text, (70, result_y + i*25))
+                        else if (i<30):
+                            screen.blit(char_text, (250, result_y + (i-15)*25))
+                        else if (i<45):
+                            screen.blit(char_text, (430, result_y + (i-30)*25))
+                        else if (i<60):
+                            screen.blit(char_text, (610, result_y + (i-45)*25))
+                        else if (i<75):
+                            screen.blit(char_text, (790, result_y + (i-60)*25))
         
         if self.current_step == 2 or self.current_step == 3:
             self.draw_step2(screen)
@@ -299,7 +316,7 @@ class SHA256Visualizer:
         def sigma1(x):
             return right_rotate(x, 17) ^ right_rotate(x, 19) ^ (x >> 10)
         
-        sigma0_text1 = font.render("σ₀(x) = (x ≫ 7) ⊕ (x ≫ 18) ⊕ (x ≫ 3)", True, BLACK)
+        sigma0_text1 = font.render("σ₀(x) = (x >> 7) ⊕ (x ≫ 18) ⊕ (x ≫ 3)", True, BLACK)
         sigma1_text1 = font.render("σ₁(x) = (x ≫ 17) ⊕ (x ≫ 19) ⊕ (x ≫ 10)", True, BLACK)
         screen.blit(sigma0_text1, (400, 300))
         screen.blit(sigma1_text1, (400, 325))
