@@ -49,7 +49,7 @@ class BinaryConverter:
             return
             
         current_time = time.time()
-        if current_time - self.last_update > 0.5:  
+        if current_time - self.last_update > 0.2:  
             self.animation_step += 1
             self.last_update = current_time
             
@@ -103,7 +103,7 @@ class SHA256Visualizer:
         self.scroll_offset = 0
         self.k_scroll_offset = 0
         self.last_w_update = 0
-        self.w_update_delay = 0.3
+        self.w_update_delay = 0.2
         self.final_step5 = False
         self.input_box = pygame.Rect(100, 350, 600, 50)  # Input box lớn hơn
         self.button_box = pygame.Rect(750, 350, 150, 50)  # Nút "Visualize" lớn hơn
