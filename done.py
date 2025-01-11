@@ -21,9 +21,9 @@ YELLOW = (255, 255, 0)
 LIGHT_BLUE = (173, 216, 230)
 
 FONT_SIZE = 20
-font = pygame.font.SysFont('DejaVu Sans', FONT_SIZE)
-title_font = pygame.font.SysFont('DejaVu Sans', 30, bold=True)
-small_font = pygame.font.SysFont('DejaVu Sans', 16)
+font = pygame.font.SysFont('Segoe UI Symbol', FONT_SIZE)
+title_font = pygame.font.SysFont('Segoe UI Symbol', 30, bold=True)
+small_font = pygame.font.SysFont('Segoe UI Symbol', 16)
 
 class BinaryConverter:
     def __init__(self, x, y):
