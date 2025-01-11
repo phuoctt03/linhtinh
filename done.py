@@ -255,10 +255,10 @@ class SHA256Visualizer:
         msg_binary = ''.join(self.binary_result)
         max_display_length = 70
         display_length = max_display_length / 2
-        if len(complete_binary) > max_display_length:
-            display_binary = complete_binary[:display_length] + "..." complete_binary[-display_length:]
+        if len(msg_binary) > max_display_length:
+            display_binary = msg_binary[:display_length] + "..." msg_binary[-display_length:]
         else:
-            display_binary = complete_binary
+            display_binary = msg_binary
         padding_one = font.render("Add '1' bit:", True, BLACK)
         screen.blit(padding_one, (50, padding_y))
         screen.blit(font.render(display_binary + "1", True, GREEN), (70, padding_y + 25))
