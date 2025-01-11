@@ -209,13 +209,13 @@ class SHA256Visualizer:
                         char_text = font.render(f"'{self.message[i]}' = {binary}", True, GREEN)
                         if (i<15):
                             screen.blit(char_text, (70, result_y + i*25))
-                        else if (i<30):
+                        elif (i<30):
                             screen.blit(char_text, (250, result_y + (i-15)*25))
-                        else if (i<45):
+                        elif (i<45):
                             screen.blit(char_text, (430, result_y + (i-30)*25))
-                        else if (i<60):
+                        elif (i<60):
                             screen.blit(char_text, (610, result_y + (i-45)*25))
-                        else if (i<75):
+                        elif (i<75):
                             screen.blit(char_text, (790, result_y + (i-60)*25))
         
         if self.current_step == 2 or self.current_step == 3:
