@@ -169,12 +169,12 @@ class SHA256Visualizer:
             text = title_font.render("Enter a message to hash:", True, BLACK)
             screen.blit(text, (self.input_box.x , self.input_box.y - 20))
             self.input_box.w = width
-            screen.blit(txt_surface, (self.input_box.x + 10, self.input_box.y + 1))
+            screen.blit(txt_surface, (self.input_box.x + 10, self.input_box.y + 10))
             pygame.draw.rect(screen, self.color, self.input_box, 3)
 
             pygame.draw.rect(screen, self.button_color, self.button_box)
             button_text = title_font.render("Visualize", True, pygame.Color('black'))
-            screen.blit(button_text, (self.button_box.x + 15, self.button_box.y + 15))
+            screen.blit(button_text, (self.button_box.x + 15, self.button_box.y + 13))
 
         if self.current_step > 0:
             msg_text = font.render(f"Input Message: {self.message}", True, BLACK)
