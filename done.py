@@ -22,7 +22,7 @@ LIGHT_BLUE = (173, 216, 230)
 
 FONT_SIZE = 20
 font = pygame.font.SysFont('Segoe UI Symbol', FONT_SIZE)
-title_font = pygame.font.SysFont('Segoe UI Symbol', 30, bold=True)
+title_font = pygame.font.SysFont('Arial', 30, bold=True)
 small_font = pygame.font.SysFont('Segoe UI Symbol', 16)
 
 class BinaryConverter:
@@ -174,7 +174,7 @@ class SHA256Visualizer:
 
             pygame.draw.rect(screen, self.button_color, self.button_box)
             button_text = title_font.render("Visualize", True, pygame.Color('black'))
-            screen.blit(button_text, (self.button_box.x + 15, self.button_box.y + 12))
+            screen.blit(button_text, (self.button_box.x + 15, self.button_box.y + 10))
 
         if self.current_step > 0:
             msg_text = font.render(f"Input Message: {self.message}", True, BLACK)
@@ -193,8 +193,9 @@ class SHA256Visualizer:
                     complete_binary = ''.join(self.binary_result)
                     # Giới hạn hiển thị chuỗi binary
                     max_display_length = 70
+                    display_length = max_display_length / 2
                     if len(complete_binary) > max_display_length:
-                        display_binary = complete_binary[:max_display_length] + "..."
+                        display_binary = complete_binary[:display_length] + "..." complete_binary[-display_length:]
                     else:
                         display_binary = complete_binary
                     
@@ -252,15 +253,20 @@ class SHA256Visualizer:
         
         padding_y = y + 30
         msg_binary = ''.join(self.binary_result)
-        
+        max_display_length = 70
+        display_length = max_display_length / 2
+        if len(complete_binary) > max_display_length:
+            display_binary = complete_binary[:display_length] + "..." complete_binary[-display_length:]
+        else:
+            display_binary = complete_binary
         padding_one = font.render("Add '1' bit:", True, BLACK)
         screen.blit(padding_one, (50, padding_y))
-        screen.blit(font.render(msg_binary + "1", True, GREEN), (70, padding_y + 25))
+        screen.blit(font.render(display_binary + "1", True, GREEN), (70, padding_y + 25))
         
         padding_zeros = font.render("Add '0' padding:", True, BLACK)
         screen.blit(padding_zeros, (50, padding_y + 50))
         padding_preview = self.padded_message[:-64]
-        screen.blit(font.render(padding_preview[:32] + "..." + padding_preview[-32:], True, GREEN), 
+        screen.blit(font.render(padding_preview[:35] + "..." + padding_preview[-35:], True, GREEN), 
                    (70, padding_y + 75))
         
         length_bits = font.render("Add message length (64 bits):", True, BLACK)
